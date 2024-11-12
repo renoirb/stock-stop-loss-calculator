@@ -99,19 +99,19 @@
     <div id="results" class="results">
         <h2>Order Settings</h2>
         
-        <div class="risk-level">Conservative (2% Account Risk)</div>
+        <div class="risk-level">Conservative (2% Risk)</div>
         <div class="exit-entry">
             <div class="exit" id="conservative"></div>
             <div class="entry" id="conservativeEntry"></div>
         </div>
         
-        <div class="risk-level">Moderate (5% Account Risk)</div>
+        <div class="risk-level">Moderate (5% Risk)</div>
         <div class="exit-entry">
             <div class="exit" id="moderate"></div>
             <div class="entry" id="moderateEntry"></div>
         </div>
         
-        <div class="risk-level">Aggressive (8% Account Risk)</div>
+        <div class="risk-level">Aggressive (8% Risk)</div>
         <div class="exit-entry">
             <div class="exit" id="aggressive"></div>
             <div class="entry" id="aggressiveEntry"></div>
@@ -126,12 +126,10 @@
             const avgCost = Number(document.getElementById('avgCost').value);
             const currentPrice = Number(document.getElementById('currentPrice').value);
             
-            const positionValue = shares * currentPrice;
-            
             const levels = {
-                conservative: calculateLevels(positionValue, 0.02, currentPrice),
-                moderate: calculateLevels(positionValue, 0.05, currentPrice),
-                aggressive: calculateLevels(positionValue, 0.08, currentPrice)
+                conservative: calculateLevels(currentPrice, 0.02),  // 2% stop, 3% entry
+                moderate: calculateLevels(currentPrice, 0.05),      // 5% stop, 6% entry
+                aggressive: calculateLevels(currentPrice, 0.08)     // 8% stop, 9% entry
             };
             
             document.getElementById('results').style.display = 'block';
@@ -146,12 +144,9 @@
             document.getElementById('aggressiveEntry').innerHTML = formatEntryLevel(levels.aggressive.reentry, currentPrice, shares);
         });
         
-        function calculateLevels(positionValue, riskPercentage, currentPrice) {
-            const maxLoss = positionValue * riskPercentage;
-            const shares = Number(document.getElementById('shares').value);
-            
-            const stopPrice = currentPrice - (maxLoss / shares);
-            const reentryPrice = stopPrice * 0.99; // 1% below stop loss
+        function calculateLevels(currentPrice, riskPercentage) {
+            const stopPrice = currentPrice * (1 - riskPercentage);
+            const reentryPrice = currentPrice * (1 - (riskPercentage + 0.01)); // Additional 1% down
             
             return {
                 stop: stopPrice,
@@ -180,14 +175,14 @@
                 <div class="strategy">
                     <div class="strategy-title">Strategy 1: Catch the Bottom</div>
                     Order Type: Limit Buy<br>
-                    Limit Price: $${reentryPrice.toFixed(2)}
+                    Limit Price: $${reentryPrice.toFixed(2)} (-${reentryPercentage}%)
                 </div>
                 
                 <div class="strategy">
                     <div class="strategy-title">Strategy 2: Wait for Reversal</div>
                     Order Type: Stop Limit Buy<br>
-                    Stop Price: $${(reentryPrice * 1.015).toFixed(2)} (triggers when price bounces up)<br>
-                    Limit Price: $${(reentryPrice * 1.03).toFixed(2)} (maximum you'll pay)
+                    Stop Price: $${(reentryPrice * 1.015).toFixed(2)}<br>
+                    Limit Price: $${(reentryPrice * 1.03).toFixed(2)}
                 </div>
                 Shares: ${shares}
             `;
