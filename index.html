@@ -67,6 +67,12 @@
             background: #fff;
             border-radius: 4px;
         }
+        .confirmation-levels {
+            background: #e6f3ff;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -113,16 +119,23 @@
         </div>
 
         <div class="order-explanation">
-            <h3>Order Types for Your Strategy:</h3>
+            <h3>Order Types & Confirmation Strategy:</h3>
+            
             <p><strong>For Exit:</strong> Use a Stop Limit Sell Order
             <br>- Set Stop Price at the calculated stop loss level
             <br>- Set Limit Price 1-2% below Stop Price to ensure execution</p>
             
-            <p><strong>For Re-entry:</strong> Two approaches:
-            <br>1. <strong>Limit Buy Order:</strong> Use when you expect a bounce from the re-entry level. Order will only execute if price drops to or below your limit price.
-            <br>2. <strong>Stop Limit Buy Order:</strong> Use when you want confirmation of upward momentum after the dip. Set Stop Price slightly above re-entry point and Limit Price 1-2% higher.</p>
+            <p><strong>For Re-entry (Trend Reversal Confirmation):</strong>
+            <br>1. <strong>Value Entry:</strong> Simple Limit Buy at the re-entry price if you want to catch the exact bottom.
+            <br>2. <strong>Momentum Confirmation:</strong> Stop Limit Buy with:
+            <br>- Stop Price: 1.5% above re-entry point
+            <br>- Limit Price: 1.5% above Stop Price</p>
             
-            <p><strong>Note:</strong> These calculations assume normal market conditions. Consider using wider stops during high volatility periods and always confirm levels with your broker's order entry rules.</p>
+            <p><strong>Why This Works:</strong>
+            <br>- Prevents buying during continued downtrend
+            <br>- Confirms upward momentum before entry
+            <br>- Provides a reasonable price range for execution
+            <br>- Protects against false breakouts with the limit price ceiling</p>
         </div>
     </div>
 
@@ -136,7 +149,7 @@
             
             const positionValue = shares * currentPrice;
             
-            // Calculate stop losses and re-entry points for different risk levels
+            // Calculate levels for different risk profiles
             const levels = {
                 conservative: calculateLevels(positionValue, 0.02, currentPrice),
                 moderate: calculateLevels(positionValue, 0.05, currentPrice),
@@ -182,11 +195,18 @@
         }
         
         function formatEntryLevel(reentryPrice, currentPrice, shares) {
+            const stopPrice = reentryPrice * 1.015; // 1.5% above re-entry
+            const limitPrice = stopPrice * 1.015; // 1.5% above stop
             const reentryPercentage = ((currentPrice - reentryPrice) / currentPrice * 100).toFixed(2);
             
             return `
                 <strong>Re-entry Point</strong><br>
-                Entry Price: $${reentryPrice.toFixed(2)}<br>
+                Value Entry (Limit): $${reentryPrice.toFixed(2)}<br>
+                <div class="confirmation-levels">
+                    <strong>Momentum Confirmation Levels:</strong><br>
+                    Stop Price: $${stopPrice.toFixed(2)}<br>
+                    Limit Price: $${limitPrice.toFixed(2)}
+                </div>
                 Distance from Current: ${reentryPercentage}%<br>
                 Shares to Buy: ${shares}
             `;
