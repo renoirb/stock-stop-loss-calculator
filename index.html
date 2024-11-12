@@ -67,6 +67,10 @@
             margin-top: 0.5rem;
             border-radius: 4px;
         }
+        .price-level {
+            font-weight: bold;
+            color: #0066cc;
+        }
         .strategy-title {
             font-weight: bold;
             margin-bottom: 0.5rem;
@@ -127,9 +131,9 @@
             const currentPrice = Number(document.getElementById('currentPrice').value);
             
             const levels = {
-                conservative: calculateLevels(currentPrice, 0.02),  // 2% stop, 3% entry
-                moderate: calculateLevels(currentPrice, 0.05),      // 5% stop, 6% entry
-                aggressive: calculateLevels(currentPrice, 0.08)     // 8% stop, 9% entry
+                conservative: calculateLevels(currentPrice, 0.02),  // 2% stop, 2.5% entry
+                moderate: calculateLevels(currentPrice, 0.05),      // 5% stop, 5.5% entry
+                aggressive: calculateLevels(currentPrice, 0.08)     // 8% stop, 8.5% entry
             };
             
             document.getElementById('results').style.display = 'block';
@@ -146,7 +150,7 @@
         
         function calculateLevels(currentPrice, riskPercentage) {
             const stopPrice = currentPrice * (1 - riskPercentage);
-            const reentryPrice = currentPrice * (1 - (riskPercentage + 0.01)); // Additional 1% down
+            const reentryPrice = currentPrice * (1 - (riskPercentage + 0.005)); // Additional 0.5% down
             
             return {
                 stop: stopPrice,
@@ -160,9 +164,8 @@
             
             return `
                 <strong>EXIT: Stop Limit Sell Order</strong><br>
-                Stop Price: $${stopPrice.toFixed(2)}<br>
+                <span class="price-level">Stop Price: $${stopPrice.toFixed(2)} (-${stopPercentage}%)</span><br>
                 Limit Price: $${(stopPrice * 0.98).toFixed(2)}<br>
-                Distance: ${stopPercentage}%<br>
                 Max Loss: $${potentialLoss}
             `;
         }
@@ -173,16 +176,16 @@
             return `
                 <strong>RE-ENTRY OPTIONS:</strong>
                 <div class="strategy">
-                    <div class="strategy-title">Strategy 1: Catch the Bottom</div>
+                    <div class="strategy-title">Strategy 1: Value Entry</div>
                     Order Type: Limit Buy<br>
-                    Limit Price: $${reentryPrice.toFixed(2)} (-${reentryPercentage}%)
+                    <span class="price-level">Limit Price: $${reentryPrice.toFixed(2)} (-${reentryPercentage}%)</span>
                 </div>
                 
                 <div class="strategy">
-                    <div class="strategy-title">Strategy 2: Wait for Reversal</div>
+                    <div class="strategy-title">Strategy 2: Reversal Entry</div>
                     Order Type: Stop Limit Buy<br>
-                    Stop Price: $${(reentryPrice * 1.015).toFixed(2)}<br>
-                    Limit Price: $${(reentryPrice * 1.03).toFixed(2)}
+                    Stop Price: $${(reentryPrice * 1.005).toFixed(2)}<br>
+                    Limit Price: $${(reentryPrice * 1.01).toFixed(2)}
                 </div>
                 Shares: ${shares}
             `;
