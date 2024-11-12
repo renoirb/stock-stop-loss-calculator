@@ -76,6 +76,13 @@
             margin-bottom: 0.5rem;
             color: #0066cc;
         }
+        .loss-range {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: #fff3f3;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
@@ -131,9 +138,9 @@
             const currentPrice = Number(document.getElementById('currentPrice').value);
             
             const levels = {
-                conservative: calculateLevels(currentPrice, 0.02),  // 2% stop, 2.5% entry
-                moderate: calculateLevels(currentPrice, 0.05),      // 5% stop, 5.5% entry
-                aggressive: calculateLevels(currentPrice, 0.08)     // 8% stop, 8.5% entry
+                conservative: calculateLevels(currentPrice, 0.02),
+                moderate: calculateLevels(currentPrice, 0.05),
+                aggressive: calculateLevels(currentPrice, 0.08)
             };
             
             document.getElementById('results').style.display = 'block';
@@ -150,7 +157,7 @@
         
         function calculateLevels(currentPrice, riskPercentage) {
             const stopPrice = currentPrice * (1 - riskPercentage);
-            const reentryPrice = currentPrice * (1 - (riskPercentage + 0.005)); // Additional 0.5% down
+            const reentryPrice = currentPrice * (1 - (riskPercentage + 0.005));
             
             return {
                 stop: stopPrice,
@@ -160,13 +167,19 @@
         
         function formatExitLevel(stopPrice, currentPrice, shares) {
             const stopPercentage = ((currentPrice - stopPrice) / currentPrice * 100).toFixed(2);
-            const potentialLoss = ((currentPrice - stopPrice) * shares).toFixed(2);
+            const limitPrice = stopPrice * 0.98;
+            const stopLoss = ((currentPrice - stopPrice) * shares).toFixed(2);
+            const limitLoss = ((currentPrice - limitPrice) * shares).toFixed(2);
             
             return `
                 <strong>EXIT: Stop Limit Sell Order</strong><br>
                 <span class="price-level">Stop Price: $${stopPrice.toFixed(2)} (-${stopPercentage}%)</span><br>
-                Limit Price: $${(stopPrice * 0.98).toFixed(2)}<br>
-                Max Loss: $${potentialLoss}
+                <span class="price-level">Limit Price: $${limitPrice.toFixed(2)}</span>
+                <div class="loss-range">
+                    Potential Loss Range:<br>
+                    Best case: $${stopLoss} (at stop price)<br>
+                    Worst case: $${limitLoss} (at limit price)
+                </div>
             `;
         }
         
